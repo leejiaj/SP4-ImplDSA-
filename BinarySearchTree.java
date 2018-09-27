@@ -1,7 +1,15 @@
+/**
+ * @author Leejia James
+ * @author Priyanka Awaraddi
+ *
+ * Binary search tree
+ *
+ * Ver 1.0: 2018/09/20 Binary search tree (starter code)
+ * Ver 1.1: 2018/09/27 Implemented Binary search tree
+ */
+
 package pxa172130;
-/** @author 
- *  Binary search tree (starter code)
- **/
+
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -14,35 +22,44 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 
         public Entry(T x, Entry<T> left, Entry<T> right) {
             this.element = x;
-	    this.left = left;
-	    this.right = right;
+            this.left = left;
+            this.right = right;
         }
     }
     
     Entry<T> root;
     int size;
-    Stack<Entry<T>> s;
+    private Stack<Entry<T>> s;
+    private int index;
 
     public BinarySearchTree() {
-	root = null;
-	size = 0;
+		root = null;
+		size = 0;
     }
-    
+    /**
+     * Finds Entry containing x or Entry at which find failed to find x     * 
+     * @return Entry containing x or Entry at which find failed to find x
+     */
     private Entry<T> find(T x)
     {
     	s = new Stack<Entry<T>>();
     	s.push(null);
     	return find(root, x);
     }
+    /**
+     * Finds x within subtree rooted at t
+     * LI: s.peek() = parent of t
+     * @return Entry containing x or Entry at which find failed to find x
+     */
     private Entry<T> find(Entry<T> t, T x)
     {
-    	if(t==null || t.element.compareTo(x)==0)
+    	if(t == null || t.element.compareTo(x) == 0)
     		return t;
     	while(true)
     	{
-    		if(x.compareTo(t.element)==-1)
+    		if(x.compareTo(t.element) == -1)
     		{
-    			if(t.left==null)
+    			if(t.left == null)
     				break;
     			else
     			{
@@ -50,81 +67,90 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
     				t = t.left;
     			}
     		}
-    		else if(x.compareTo(t.element)==0)
+    		else if(x.compareTo(t.element) == 0)
     			break;
     		else
     		{
-    			if(t.right==null)break;
+    			if(t.right == null)
+    				break;
     			else
     			{
-    				s.push(t);t=t.right;
+    				s.push(t);
+    				t = t.right;
     			}
     		}
     	}
     	return  t;
     }
 
-    /** TO DO: Is x contained in tree?
+    /** 
+     * Checks if x is contained in the tree
+     * @return true if x is in the tree, false otherwise
      */
     public boolean contains(T x) {
     	Entry<T> t = find(x);
-    	if(t==null || t.element != x)
+    	if(t == null || t.element != x)
     		return false;
     	else
     		return true;
     }
 
-    /** TO DO: Is there an element that is equal to x in the tree?
-     *  Element in tree that is equal to x is returned, null otherwise.
+    /** 
+     * Checks if there is an element that is equal to x in the tree.
+     * @return Element in tree that is equal to x, null if there is 
+     * no such element.
      */
     public T get(T x) {
-	return null;
+    	return find(x) == null || find(x).element != x ? null : find(x).element;
     }
 
-    /** TO DO: Add x to tree. 
-     *  If tree contains a node with same key, replace element by x.
-     *  Returns true if x is a new element added to tree.
+    /** 
+     *  Adds x to tree. If tree contains a node with same key, 
+     *  replaces element by x.
+     *  @return true if x is a new element added to tree, false otherwise
      */
     public boolean add(T x) {
-    	if(size==0)
+    	if(size == 0)
     	{
-    		root = new Entry<T>(x,null,null);
+    		root = new Entry<T>(x, null, null);
     		size++;
     		return true;
     	}
     	else
     	{
     		Entry<T> t = find(x);
-    		if(t.element.compareTo(x)==0)
+    		if(t.element.compareTo(x) == 0)
     		{
-    			t.element=x;
+    			t.element = x;
     			return false;
     		}
-    		else if(x.compareTo(t.element)<0)
+    		else if(x.compareTo(t.element) < 0)
     		{
-    			t.left = new Entry<T>(x,null,null);
+    			t.left = new Entry<T>(x, null, null);
     		}
     		else
     		{
-    			t.right = new Entry<T>(x,null,null);
+    			t.right = new Entry<T>(x, null, null);
     		}
     		size++;	
+        	return true;
     	}
-    	return true;
     }
 
-    /** TO DO: Remove x from tree. 
-     *  Return x if found, otherwise return null
+    /** 
+     *  Removes x from tree. 
+     *  @return x if found, otherwise null
      */
     public T remove(T x) {
-    	if(root == null) return null;
+    	if(root == null) 
+    		return null;
     	Entry<T> t = find(x);
-    	if(t.element.compareTo(x)!=0)
+    	if(t.element.compareTo(x) != 0)
     	{
     		return null;
     	}
     	T result = t.element;
-    	if(t.left ==null || t.right ==null)
+    	if(t.left == null || t.right == null)
     		bypass(t);
     	else
     	{
@@ -132,51 +158,82 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
     		Entry<T> minRight = find(t.right,x);
     		t.element = minRight.element;
     		bypass(minRight);
-    		size--;
     	}
+		size--;
     	return result;
     }
     
+    /**
+     * Helper function used in remove().
+     * Precondition: t has at most one child
+     * 				stack s has path from root to parent of t
+     */
     private void bypass(Entry<T> t)
     {
     	Entry<T> parent = s.peek();
-    	Entry<T> child = t.left==null? t.right: t.left;
+    	Entry<T> child = t.left == null ? t.right : t.left;
     	if(parent == null)
     		root = child;
     	else
     	{
-    		if(parent.left==t)
-    			parent.left=child;
+    		if(parent.left == t)
+    			parent.left = child;
     		else
-    			parent.right=child;
+    			parent.right = child;
     	}
     }
 
+    /**
+     * Finds the minimum element of tree
+     * @return minimum element, null if tree is empty
+     */
     public T min() {
-    	if(size==0) return null;
+    	if(size == 0) 
+    		return null;
     	Entry<T> t = root;
-    	while(t.left !=null)
+    	while(t.left != null)
     	{
     		t = t.left;
     	}
     	return t.element;
     }
-
+    
+    /**
+     * Finds the maximum element of tree
+     * @return maximum element, null if tree is empty
+     */
     public T max() {
-    	if(size==0) return null;
+    	if(size == 0) 
+    		return null;
     	Entry<T> t = root;
-    	while(t.right !=null)
+    	while(t.right != null)
     	{
     		t = t.right;
     	}
     	return t.element;
     }
 
-    // TODO: Create an array with the elements using in-order traversal of tree
+    /**
+     * In-order traversal of tree: Helper method to create an array with
+     * the in-order traversal of tree
+     */
+    private void inorderToArray(Comparable[] arr, Entry<T> node) {
+		if(node != null) {
+			inorderToArray(arr, node.left);
+			arr[index++] = (Comparable) node.element;
+		    inorderToArray(arr, node.right);
+		}
+    }
+    
+    /**
+     * Creates an array with the elements using in-order traversal of tree
+     * @return array with elements of tree
+     */
     public Comparable[] toArray() {
-	Comparable[] arr = new Comparable[size];
-	/* write code to place elements in array here */
-	return arr;
+		Comparable[] arr = new Comparable[size];
+		index = 0;
+	    inorderToArray(arr, this.root);
+		return arr;
     }
 
 
@@ -238,18 +295,18 @@ public class BinarySearchTree<T extends Comparable<? super T>> implements Iterab
 
 
     public void printTree() {
-	System.out.print("[" + size + "]");
-	printTree(root);
-	System.out.println();
+		System.out.print("[" + size + "]");
+		printTree(root);
+		System.out.println();
     }
 
     // Inorder traversal of tree
     void printTree(Entry<T> node) {
-	if(node != null) {
-	    printTree(node.left);
-	    System.out.print(" " + node.element);
-	    printTree(node.right);
-	}
+		if(node != null) {
+		    printTree(node.left);
+		    System.out.print(" " + node.element);
+		    printTree(node.right);
+		}
     }
 
 }
